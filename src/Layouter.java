@@ -6,82 +6,79 @@
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferStrategy;
-import java.awt.image.MemoryImageSource;
+import java.awt.geom.GeneralPath;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JButton;
+import javax.swing.JFrame;
 
-public class Layouter implements Runnable {
+public class Layouter extends JFrame implements Runnable {
 
     // another hello
-    Frame _mf;
-    int _xs, _ys;
-    BufferStrategy _bs;
-    int[] _pixels;
-    MemoryImageSource _src;
-    Image _ii;
-//    long _FPStime = 16666666L;
+    mybutClass _but[] = new mybutClass[4];
 
     public Layouter() {
+        super("Heart Shape");
+        setBounds(0, 0, 1000, 1000);
+        getContentPane().setLayout(null);
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        int numBuffers = 2;
-        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice device = env.getDefaultScreenDevice();
-        try {
-            GraphicsConfiguration gc = device.getDefaultConfiguration();
-            _xs = gc.getBounds().width;
-            _ys = gc.getBounds().height;
-            _mf = new Frame(gc);
-            _mf.setUndecorated(true);
-            _mf.setIgnoreRepaint(true);
-            _mf.addMouseListener(new MouseAdapter() {
-                @Override
-                public void mousePressed(MouseEvent e) {
-                    System.exit(0);
-                }
-            });
-            device.setFullScreenWindow(_mf);
-            if (device.isDisplayChangeSupported()) {
-                DisplayMode best = new DisplayMode(_xs, _ys, 32, 0);
-                device.setDisplayMode(best);
-            }
-            _mf.createBufferStrategy(numBuffers);
-            _bs = _mf.getBufferStrategy();
-
-            _pixels = new int[_xs * _ys];
-            for (int i = 0; i < _xs * _ys; i++) {
-                _pixels[i] = 0xff000000;
-            }
-            _src = new MemoryImageSource(_xs, _ys, _pixels, 0, _xs);
-            _src.setAnimated(true);
-            _ii = _mf.createImage(_src);
-
-        } catch (Exception e) {
+        for (int i = 0; i < _but.length; i++) {
+            _but[i] = new mybutClass();
+            getContentPane().add(_but[i]);
+            _but[i].setBounds(20, 50 + i * 50, 10, 10);
+            _but[i].setVisible(true);
         }
+
+        _but[0].setLocation(252, 236);
+        _but[1].setLocation(175, 160);
+        _but[2].setLocation(71, 245);
+        _but[3].setLocation(256, 400);
+
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                for (int i = 0; i < _but.length; i++) {
+                    System.out.println("p[" + i + "]=" + _but[i].getLocation().x + ", " + _but[i].getLocation().y);
+                }
+
+            }
+        });
+
     }
 
-    @Override
     public void run() {
-        Button b = new Button(0, 0, _xs/4, _ys, Color.YELLOW, "Hello");
-
-        long FPStime = 166666666L;
-        long millis;
         while (true) {
-            millis = System.nanoTime() + FPStime;
-            Graphics g = _bs.getDrawGraphics();
-            if (!_bs.contentsLost()) {
-                Graphics2D gg = (Graphics2D) g;
-                g.drawImage(_ii, 0, 0, null);
-                b.render(gg);
-                _bs.show();
-                g.dispose();
-                while (millis > System.nanoTime()) {
-                    try {
-                        Thread.sleep(1);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(Layouter.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
+            Graphics2D gg = (Graphics2D) getGraphics();
+
+            try {
+                gg.setColor(Color.white);
+                gg.fillRect(0, 0, 1000, 1000);
+                update(gg);
+
+                GeneralPath gp3 = new GeneralPath();
+                gp3.moveTo(_but[0].getLocation().x, _but[0].getLocation().y);
+                gp3.curveTo(_but[1].getLocation().x, _but[1].getLocation().y,
+                        _but[2].getLocation().x, _but[2].getLocation().y,
+                        _but[3].getLocation().x, _but[3].getLocation().y);
+
+                gp3.curveTo(500 - _but[2].getLocation().x, _but[2].getLocation().y,
+                        500 - _but[1].getLocation().x, _but[1].getLocation().y,
+                        500 - _but[0].getLocation().x, _but[0].getLocation().y);
+
+                gp3.closePath();
+                gg.setColor(Color.red);
+                gg.fill(gp3);
+
+            } catch (NullPointerException ex) {
+//            System.err.println("" + _but[0].toString());
+            }
+
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Layouter.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
@@ -89,32 +86,35 @@ public class Layouter implements Runnable {
     public static void main(String[] args) {
         Thread app = new Thread(new Layouter());
         app.start();
-
     }
 
-    class Button {
+    class mybutClass extends JButton {
 
-        int x, y, w, h;
-        String s;
-        Color c;
-        Font f;
+        Point anchorPoint;
 
-        public Button(int x, int y, int w, int h, Color c, String s) {
-            this.x = x;
-            this.y = y;
-            this.w = w;
-            this.h = h;
-            this.s = new String(s);
-            this.c = c;
-            f = new Font("Arial", Font.PLAIN, 48);
-        }
+        public mybutClass() {
+            super();
+            addMouseMotionListener(new MouseAdapter() {
+                @Override
+                public void mouseMoved(MouseEvent e) {
+                    anchorPoint = e.getPoint();
+                    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        public void render(Graphics2D gg) {
-            gg.setColor(c);
-            gg.fillRect(x, y, w, h);
-            gg.setColor(Color.black);
-            gg.setFont(f);
-            gg.drawString(s, x+w/2, y+h/2);
+                }
+
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    int anchorX = anchorPoint.x;
+                    int anchorY = anchorPoint.y;
+
+                    Point parentOnScreen = getParent().getLocationOnScreen();
+                    Point mouseOnScreen = e.getLocationOnScreen();
+                    Point position = new Point(mouseOnScreen.x - parentOnScreen.x
+                            - anchorX, mouseOnScreen.y - parentOnScreen.y - anchorY);
+                    setLocation(position);
+                }
+            });
         }
     }
+
 }
