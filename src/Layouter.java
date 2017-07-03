@@ -4,18 +4,14 @@
  *
  * */
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.geom.GeneralPath;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JButton;
 import javax.swing.JFrame;
 
 public class Layouter extends JFrame implements Runnable {
 
     // another hello
-    mybutClass _but[] = new mybutClass[4];
 
     public Layouter() {
         super("Heart Shape");
@@ -24,27 +20,6 @@ public class Layouter extends JFrame implements Runnable {
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        for (int i = 0; i < _but.length; i++) {
-            _but[i] = new mybutClass();
-            getContentPane().add(_but[i]);
-            _but[i].setBounds(20, 50 + i * 50, 10, 10);
-            _but[i].setVisible(true);
-        }
-
-        _but[0].setLocation(252, 236);
-        _but[1].setLocation(175, 160);
-        _but[2].setLocation(71, 245);
-        _but[3].setLocation(256, 400);
-
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                for (int i = 0; i < _but.length; i++) {
-                    System.out.println("p[" + i + "]=" + _but[i].getLocation().x + ", " + _but[i].getLocation().y);
-                }
-
-            }
-        });
 
     }
 
@@ -58,14 +33,11 @@ public class Layouter extends JFrame implements Runnable {
                 update(gg);
 
                 GeneralPath gp3 = new GeneralPath();
-                gp3.moveTo(_but[0].getLocation().x, _but[0].getLocation().y);
-                gp3.curveTo(_but[1].getLocation().x, _but[1].getLocation().y,
-                        _but[2].getLocation().x, _but[2].getLocation().y,
-                        _but[3].getLocation().x, _but[3].getLocation().y);
+                gp3.moveTo(252, 236);
+                gp3.curveTo(175, 160, 71, 245, 256, 400);
 
-                gp3.curveTo(500 - _but[2].getLocation().x, _but[2].getLocation().y,
-                        500 - _but[1].getLocation().x, _but[1].getLocation().y,
-                        500 - _but[0].getLocation().x, _but[0].getLocation().y);
+//                gp3.curveTo(500 - 71, 245, 500 - 175, 160, 500 - 252, 236);
+                gp3.curveTo(429, 245, 325, 160, 248, 236);
 
                 gp3.closePath();
                 gg.setColor(Color.red);
@@ -86,35 +58,6 @@ public class Layouter extends JFrame implements Runnable {
     public static void main(String[] args) {
         Thread app = new Thread(new Layouter());
         app.start();
-    }
-
-    class mybutClass extends JButton {
-
-        Point anchorPoint;
-
-        public mybutClass() {
-            super();
-            addMouseMotionListener(new MouseAdapter() {
-                @Override
-                public void mouseMoved(MouseEvent e) {
-                    anchorPoint = e.getPoint();
-                    setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-
-                }
-
-                @Override
-                public void mouseDragged(MouseEvent e) {
-                    int anchorX = anchorPoint.x;
-                    int anchorY = anchorPoint.y;
-
-                    Point parentOnScreen = getParent().getLocationOnScreen();
-                    Point mouseOnScreen = e.getLocationOnScreen();
-                    Point position = new Point(mouseOnScreen.x - parentOnScreen.x
-                            - anchorX, mouseOnScreen.y - parentOnScreen.y - anchorY);
-                    setLocation(position);
-                }
-            });
-        }
     }
 
 }
