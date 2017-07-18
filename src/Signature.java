@@ -17,10 +17,11 @@ public class Signature extends JFrame {
         getContentPane().add(mp, BorderLayout.CENTER);
         //mp.setVisible(true);
         Toolkit tk = getToolkit();
-        setBounds(0, 0, tk.getScreenSize().width, tk.getScreenSize().height-50);
+        setBounds(0, 0, tk.getScreenSize().width, tk.getScreenSize().height - 50);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         Thread t = new Thread(mp);
+        t.start();
     }
 
     public static void main(String[] args) {
@@ -29,11 +30,14 @@ public class Signature extends JFrame {
 //        app.start();
     }
 
-    class MyPanel extends JPanel implements Runnable{
+    class MyPanel extends JPanel implements Runnable {
+
+        MyPoint p = new MyPoint();
+
         public MyPanel() {
             super();
         }
-        
+
         public void render() {
             Graphics g = getGraphics();
             paint(g);
@@ -47,18 +51,27 @@ public class Signature extends JFrame {
 
         @Override
         public void run() {
-        while (true) {
-            try {
-                Thread.sleep(2500);
-            } catch (InterruptedException ex) {
-                //            Logger.getLogger(Layouter.class.getName()).log(Level.SEVERE, null, ex);
+            p.x = 100;
+            p.y = 100;
+            while (true) {
+                try {
+                    Graphics2D gg = (Graphics2D) getGraphics();
+                    gg.clearRect(p.x, p.y, 10, 10);
+                    p.x = (p.x < 1000) ? p.x+1: 100;
+                    p.y = (p.y < 1000) ? p.y+1: 100;
+                    gg.setColor(Color.red);
+                    gg.fillRect(p.x, p.y, 10, 10);
+                    Thread.sleep(20);
+                } catch (InterruptedException ex) {
+                    //            Logger.getLogger(Layouter.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
-        }
     }
-    
-    class MyPoint extends Point2D.Double{
-        public MyPoint(){
+
+    class MyPoint extends Point {
+
+        public MyPoint() {
             super();
         }
     }
