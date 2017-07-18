@@ -3,7 +3,6 @@
  *
  * */
 import java.awt.*;
-import java.awt.geom.Point2D;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -32,10 +31,11 @@ public class Signature extends JFrame {
 
     class MyPanel extends JPanel implements Runnable {
 
-        MyPoint p = new MyPoint();
+        MyPoint p[] = new MyPoint[200];
 
         public MyPanel() {
             super();
+
         }
 
         public void render() {
@@ -51,16 +51,24 @@ public class Signature extends JFrame {
 
         @Override
         public void run() {
-            p.x = 100;
-            p.y = 100;
+            for (int i=0 ; i<p.length ; i++) {
+                p[i] = new MyPoint();
+                p[i].x = 1000 * Math.random();
+                p[i].y = 1000 * Math.random();
+                p[i].vx = 1 + 5 * Math.random();
+                p[i].vy = 1 + 5 * Math.random();
+            }
             while (true) {
-                try {
-                    Graphics2D gg = (Graphics2D) getGraphics();
-                    gg.clearRect(p.x, p.y, 10, 10);
-                    p.x = (p.x < 1000) ? p.x+1: 100;
-                    p.y = (p.y < 1000) ? p.y+1: 100;
+
+                Graphics2D gg = (Graphics2D) getGraphics();
+                for (MyPoint i : p) {
+                    gg.clearRect((int) i.x, (int) i.y, 10, 10);
+                    i.x = (i.x < 1000) ? i.x + i.vx : 0;
+                    i.y = (i.y < 1000) ? i.y + i.vy : 0;
                     gg.setColor(Color.red);
-                    gg.fillRect(p.x, p.y, 10, 10);
+                    gg.fillRect((int) i.x, (int) i.y, 10, 10);
+                }
+                try {
                     Thread.sleep(20);
                 } catch (InterruptedException ex) {
                     //            Logger.getLogger(Layouter.class.getName()).log(Level.SEVERE, null, ex);
@@ -69,10 +77,12 @@ public class Signature extends JFrame {
         }
     }
 
-    class MyPoint extends Point {
+    class MyPoint {
 
-        public MyPoint() {
-            super();
+        double x, y, vx, vy;
+
+        public void tick() {
+
         }
     }
 
