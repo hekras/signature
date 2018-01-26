@@ -1,6 +1,6 @@
 
 /**
- *
+ *continus delivery integration
  * */
 import java.awt.*;
 import javax.swing.JFrame;
@@ -16,7 +16,7 @@ public class Signature extends JFrame {
         getContentPane().add(mp, BorderLayout.CENTER);
         //mp.setVisible(true);
         Toolkit tk = getToolkit();
-        setBounds(0, 0, tk.getScreenSize().width, tk.getScreenSize().height - 50);
+        setBounds(tk.getScreenSize().width / 2, 0, tk.getScreenSize().width / 2, tk.getScreenSize().height - 50);
         setVisible(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         Thread t = new Thread(mp);
@@ -31,19 +31,14 @@ public class Signature extends JFrame {
 
     class MyPanel extends JPanel implements Runnable {
 
-        MyPoint p[] = new MyPoint[200];
+        MyPoint p[] = new MyPoint[1000];
 
         public MyPanel() {
             super();
 
         }
 
-        public void render() {
-            Graphics g = getGraphics();
-            paint(g);
-        }
-
-        @Override
+         @Override
         public void paint(Graphics g) {
             Graphics2D gg = (Graphics2D) g;
 
@@ -51,20 +46,28 @@ public class Signature extends JFrame {
 
         @Override
         public void run() {
-            for (int i=0 ; i<p.length ; i++) {
+            for (int i = 0; i < p.length; i++) {
+                double r = 2 * Math.PI * Math.random();
                 p[i] = new MyPoint();
-                p[i].x = 1000 * Math.random();
-                p[i].y = 1000 * Math.random();
+                p[i].x = p[i].x1 = 500 + 300 * Math.sin(r);
+                p[i].y = p[i].y1 = 500 + 300 * Math.cos(r);
                 p[i].vx = 1 + 5 * Math.random();
                 p[i].vy = 1 + 5 * Math.random();
+                p[i].c = p[i].c1 = (int) (10 + 25 * Math.random());
             }
             while (true) {
 
                 Graphics2D gg = (Graphics2D) getGraphics();
                 for (MyPoint i : p) {
                     gg.clearRect((int) i.x, (int) i.y, 10, 10);
-                    i.x = (i.x < 1000) ? i.x + i.vx : 0;
-                    i.y = (i.y < 1000) ? i.y + i.vy : 0;
+                    i.x = i.x + i.vx;
+                    i.y = i.y + i.vy;
+                    i.c--;
+                    if ((i.x > 1000) || (i.y > 1000) || (i.c == 0)) {
+                        i.x = i.x1;
+                        i.y = i.y1;
+                        i.c = i.c1;
+                    }
                     gg.setColor(Color.red);
                     gg.fillRect((int) i.x, (int) i.y, 10, 10);
                 }
@@ -79,7 +82,8 @@ public class Signature extends JFrame {
 
     class MyPoint {
 
-        double x, y, vx, vy;
+        double x1, y1, x, y, vx, vy;
+        int c, c1;
 
         public void tick() {
 
